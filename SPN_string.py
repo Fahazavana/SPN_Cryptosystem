@@ -216,5 +216,3 @@ if __name__ == '__main__':
     plain_file.close()
     ciphered_file.close()
     print("Decryption Finished")
-
-
