@@ -145,7 +145,7 @@ def de_encryption(msg,key):
     msg = msg ^ subKey[0]
     return msg
 
-
+####################################### ATTACK ###########################################
 # Create differential table
 # To annalyse which difference occur the most
 def create_dTable():
@@ -168,20 +168,77 @@ def gen_pair(in_diff, out_diff):
     return pairs
 
 
-print("Sbox",apply_SBox(0b1111, S_BOX))
-print("Pbox",apply_PBox(0b1111, P_BOX))
-x = int('111',2)
-y = encryption(x, KEY)
-z = de_encryption(y, KEY)
 
-print(bin(x))
-print(bin(y))
-print(bin(z))
+def test():
+    print("\n                      S.P.N.")
+    print('======================================================')
+    print("The output will be writen in binary mode.\n")
+    x = int('111',2)
+    print('======================================================')
+    print("32-bits Key      : {}\n".format(bin(int(KEY,2))))
+    print('======================================================')
+    print("Plain text       : {}\n".format(bin(x)))
+    print('======================================================')
+    y = encryption(x, KEY)
+    print("Ciphered text    : {}\n".format(bin(y)))
+    print('======================================================')
+    z= de_encryption(y, KEY)
+    print("De_Ciphered text : {}\n".format(bin(z)))
+    print('======================================================')
 
+if __name__ == '__main__':
+    test()
+    #############Encrypt file###############
+    # read a file in binary mode
+    print("\n======================================")
+    print("|        FILE ENCRYPTION TEST        |")
+    print("======================================\n")
+    plain_file = open("SPN_test/plain_text.txt","r")
+    ciphered_file = open("SPN_test/ciphered_text.txt","wb")
+    while True:
+        char = plain_file.read(1)
+        
+        if not char:
+            break
+        elif char=="\n" : ciphered_file.write("\n")
+        else:
+            char = (ord(char))
+            char = encryption(char, KEY)
+            ciphered_file.write("\\".encode("ascii")+ hex(char).encode("ascii"))
+    plain_file.close()
+    ciphered_file.close()
 
-diff_table = create_dTable()
-### We see here that the differnce with 11 lead to 8 possibilty
-print(tabulate(diff_table,headers='firstrow',tablefmt='fancy_grid'))
-A = gen_pair(11,2)
-print(A)
-
+    print("Encryption Finished")
+    #############Decrypt file###############
+    # read a file in binary mode
+    print("\n======================================")
+    print("|        FILE DECRYPTION TEST        |")
+    print("======================================\n")
+    ciphered_file = open("SPN_test/ciphered_text.txt","r")
+    plain_file = open("SPN_test/plain_text2.txt","w")
+    while True:
+        #char = ciphered_file.read(1)
+        L = ciphered_file.readline()
+        L=L.split(chr(92))
+        if L==['']:
+            break
+        for x in L:
+            if x ==chr(10)  : plain_file.write(chr(10))
+            if x=='n' : print("n")
+            elif x == '\\' : continue
+            elif x == '' : continue
+            else :
+                if x[-1]=='\n': 
+                    char=x[:-1]
+                    if char == '':
+                        continue
+                    char = int(char,16)
+                    char=de_encryption(char, KEY)
+                    plain_file.write(chr(char)+chr(10))
+                else :
+                    char = int(x,16)
+                    char=de_encryption(char, KEY)
+                    plain_file.write(chr(char))
+    plain_file.close()
+    ciphered_file.close()
+    print("Decryption Finished")
